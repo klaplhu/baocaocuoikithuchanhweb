@@ -1,0 +1,331 @@
+const QUIZ_DATABASE = [
+  {
+    "id": "html-css-core",
+    "title": "Kiến thức Nền tảng HTML5 & CSS3 Layout",
+    "topic": "HTML5 & CSS3",
+    "difficulty": "Dễ",
+    "duration": 300,
+    "description": "Đánh giá kỹ năng sử dụng thẻ ngữ nghĩa HTML5, bố cục Flexbox, CSS Grid và thiết kế giao diện chuẩn.",
+    "skills": [
+      "HTML5 Semantics",
+      "Flexbox & Grid",
+      "CSS Selectors"
+    ],
+    "questions": [
+      {
+        "id": 101,
+        "type": "single",
+        "skill": "HTML5 Semantics",
+        "question": "Thẻ HTML5 ngữ nghĩa (Semantic) nào phù hợp nhất để chứa phần điều hướng chính (menu liên kết) của trang web?",
+        "options": [
+          "<section>",
+          "<nav>",
+          "<header>",
+          "<aside>"
+        ],
+        "correct": [
+          1
+        ],
+        "explanation": "Thẻ <nav> (Navigation) được thiết kế chuyên biệt trong HTML5 để định nghĩa khu vực chứa các liên kết điều hướng chính."
+      },
+      {
+        "id": 102,
+        "type": "single",
+        "skill": "Flexbox & Grid",
+        "question": "Trong CSS Flexbox, thuộc tính nào dùng để căn chỉnh các phần tử con dọc theo trục chính (Main Axis)?",
+        "options": [
+          "align-items",
+          "justify-content",
+          "align-content",
+          "flex-direction"
+        ],
+        "correct": [
+          1
+        ],
+        "explanation": "justify-content điều khiển việc căn chỉnh phần tử dọc theo trục chính (Main Axis), còn align-items căn theo trục phụ (Cross Axis)."
+      },
+      {
+        "id": 103,
+        "type": "multiple",
+        "skill": "Flexbox & Grid",
+        "question": "Những thuộc tính nào sau đây thuộc hệ thống bố cục CSS Grid Layout? (Chọn nhiều đáp án)",
+        "options": [
+          "grid-template-columns",
+          "justify-items",
+          "float: left",
+          "grid-gap / gap"
+        ],
+        "correct": [
+          0,
+          1,
+          3
+        ],
+        "explanation": "grid-template-columns, justify-items và gap thuộc hệ thống Grid/Flex hiện đại; float là kỹ thuật bố cục cũ."
+      },
+      {
+        "id": 104,
+        "type": "single",
+        "skill": "CSS Selectors",
+        "question": "Bộ chọn (Selector) nào trong CSS có độ ưu tiên (Specificity) cao nhất trong các lựa chọn dưới đây?",
+        "options": [
+          ".navbar-item (Class)",
+          "#main-header (ID)",
+          "header nav a (Element)",
+          "* (Universal)"
+        ],
+        "correct": [
+          1
+        ],
+        "explanation": "Bộ chọn ID (#main-header) có trọng số ưu tiên (1-0-0) cao hơn Class (0-1-0) và Element (0-0-1)."
+      },
+      {
+        "id": 105,
+        "type": "multiple",
+        "skill": "HTML5 Semantics",
+        "question": "Những phần tử nào sau đây là thẻ ngữ nghĩa mới được giới thiệu trong chuẩn HTML5? (Chọn nhiều đáp án)",
+        "options": [
+          "<article>",
+          "<div>",
+          "<figure>",
+          "<footer>"
+        ],
+        "correct": [
+          0,
+          2,
+          3
+        ],
+        "explanation": "<article>, <figure> và <footer> mang ý nghĩa ngữ nghĩa rõ ràng về nội dung, trong khi <div> là thẻ bao chung không mang ngữ nghĩa."
+      },
+      {
+        "id": 106,
+        "type": "single",
+        "skill": "CSS Selectors",
+        "question": "Lớp giả (Pseudo-class) nào được kích hoạt khi người dùng di con trỏ chuột lên trên phần tử?",
+        "options": [
+          ":focus",
+          ":active",
+          ":hover",
+          ":visited"
+        ],
+        "correct": [
+          2
+        ],
+        "explanation": ":hover áp dụng kiểu dáng khi con trỏ chuột nằm trên phần tử."
+      }
+    ]
+  },
+  {
+    "id": "js-dom-json",
+    "title": "Lập trình JavaScript, DOM & Xử lý Dữ liệu JSON",
+    "topic": "JavaScript",
+    "difficulty": "Trung bình",
+    "duration": 360,
+    "description": "Kiểm tra kỹ năng thao tác DOM, bắt sự kiện người dùng, mảng và chuyển đổi dữ liệu JSON trong ứng dụng web.",
+    "skills": [
+      "DOM Manipulation",
+      "JSON & Storage",
+      "Array Methods"
+    ],
+    "questions": [
+      {
+        "id": 201,
+        "type": "multiple",
+        "skill": "DOM Manipulation",
+        "question": "Những phương thức nào sau đây dùng để truy vấn phần tử HTML trong DOM? (Chọn nhiều đáp án)",
+        "options": [
+          "document.getElementById()",
+          "document.querySelector()",
+          "JSON.stringify()",
+          "document.querySelectorAll()"
+        ],
+        "correct": [
+          0,
+          1,
+          3
+        ],
+        "explanation": "getElementById, querySelector và querySelectorAll dùng để truy xuất phần tử DOM; JSON.stringify dùng để chuyển Object thành chuỗi JSON."
+      },
+      {
+        "id": 202,
+        "type": "single",
+        "skill": "JSON & Storage",
+        "question": "Phương thức nào dùng để chuyển đổi một chuỗi JSON nhận từ server thành đối tượng JavaScript?",
+        "options": [
+          "JSON.stringify()",
+          "JSON.parse()",
+          "JSON.toObject()",
+          "Object.fromJSON()"
+        ],
+        "correct": [
+          1
+        ],
+        "explanation": "JSON.parse() phân tích cú pháp một chuỗi JSON hợp lệ và trả về đối tượng hoặc mảng JavaScript tương ứng."
+      },
+      {
+        "id": 203,
+        "type": "multiple",
+        "skill": "Array Methods",
+        "question": "Những phương thức mảng nào trong JavaScript trả về một mảng mới mà KHÔNG làm thay đổi mảng gốc? (Chọn nhiều đáp án)",
+        "options": [
+          "Array.prototype.map()",
+          "Array.prototype.filter()",
+          "Array.prototype.push()",
+          "Array.prototype.slice()"
+        ],
+        "correct": [
+          0,
+          1,
+          3
+        ],
+        "explanation": "map(), filter() và slice() tạo ra mảng mới; trong khi push() thay đổi trực tiếp mảng ban đầu."
+      },
+      {
+        "id": 204,
+        "type": "single",
+        "skill": "DOM Manipulation",
+        "question": "Khi xử lý sự kiện submit của thẻ <form>, lệnh nào giúp ngăn trình duyệt tự động tải lại trang?",
+        "options": [
+          "event.stopPropagation()",
+          "event.preventDefault()",
+          "window.stop()",
+          "return falseNow()"
+        ],
+        "correct": [
+          1
+        ],
+        "explanation": "event.preventDefault() chặn hành vi mặc định của trình duyệt (như reload trang khi submit form)."
+      },
+      {
+        "id": 205,
+        "type": "single",
+        "skill": "JSON & Storage",
+        "question": "Dữ liệu lưu trữ trong localStorage của trình duyệt có đặc điểm gì?",
+        "options": [
+          "Tự động xóa ngay khi đóng tab trình duyệt",
+          "Lưu trữ dưới dạng cặp khóa - giá trị kiểu chuỗi (String) và không tự mất khi đóng trình duyệt",
+          "Chỉ lưu được tối đa 4KB và gửi kèm mọi HTTP Request",
+          "Lưu trực tiếp được các hàm (Function) JavaScript"
+        ],
+        "correct": [
+          1
+        ],
+        "explanation": "localStorage lưu dữ liệu dạng chuỗi bền vững qua các phiên làm việc cho đến khi được xóa chủ động."
+      }
+    ]
+  },
+  {
+    "id": "responsive-ux-quiz",
+    "title": "Thiết kế Đáp ứng (Responsive) & Tối ưu Trải nghiệm UI/UX",
+    "topic": "Responsive & UI/UX",
+    "difficulty": "Khó",
+    "duration": 420,
+    "description": "Đánh giá chuyên sâu về Media Queries, đơn vị đo lường tương đối, khả năng tiếp cận (Accessibility) và tối ưu giao diện.",
+    "skills": [
+      "Media Queries",
+      "Relative Units",
+      "Web Accessibility"
+    ],
+    "questions": [
+      {
+        "id": 301,
+        "type": "single",
+        "skill": "Media Queries",
+        "question": "Khi thiết kế theo chiến lược Mobile-First, ta nên ưu tiên sử dụng điều kiện nào trong @media?",
+        "options": [
+          "max-width",
+          "min-width",
+          "device-aspect-ratio",
+          "max-resolution"
+        ],
+        "correct": [
+          1
+        ],
+        "explanation": "Thiết kế Mobile-First viết CSS mặc định cho màn hình nhỏ trước, sau đó dùng min-width để mở rộng dần cho màn hình lớn hơn."
+      },
+      {
+        "id": 302,
+        "type": "multiple",
+        "skill": "Relative Units",
+        "question": "Những đơn vị CSS nào sau đây là đơn vị tương đối (Relative Units) giúp giao diện co giãn linh hoạt? (Chọn nhiều đáp án)",
+        "options": [
+          "rem",
+          "vw / vh",
+          "px",
+          "em"
+        ],
+        "correct": [
+          0,
+          1,
+          3
+        ],
+        "explanation": "rem (theo font-size của html), em (theo phần tử cha) và vw/vh (theo khung nhìn) là các đơn vị tương đối."
+      },
+      {
+        "id": 303,
+        "type": "single",
+        "skill": "Web Accessibility",
+        "question": "Thuộc tính nào bắt buộc phải có trên thẻ <img> để hỗ trợ trình đọc màn hình và hiển thị văn bản thay thế khi ảnh lỗi?",
+        "options": [
+          "title",
+          "alt",
+          "srcset",
+          "aria-hidden"
+        ],
+        "correct": [
+          1
+        ],
+        "explanation": "Thuộc tính alt (Alternative text) cung cấp mô tả văn bản cho hình ảnh, rất quan trọng cho SEO và khả năng tiếp cận."
+      }
+    ]
+  }
+];
+
+function escapeHTML(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function getActiveQuizData() {
+  const activeId = localStorage.getItem("activeQuizId") || "html-css-core";
+  if (activeId === "adaptive-custom") {
+    const custom = localStorage.getItem("adaptiveCustomQuiz");
+    if (custom) return JSON.parse(custom);
+  }
+  return QUIZ_DATABASE.find(q => q.id === activeId) || QUIZ_DATABASE[0];
+}
+
+function openJsonModal() {
+  let modal = document.getElementById("json-viewer-modal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "json-viewer-modal";
+    modal.className = "fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4";
+    modal.innerHTML = `
+      <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
+        <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-code text-indigo-400"></i>
+            <h3 class="font-bold text-base">Cấu trúc Dữ liệu Ngân hàng Câu hỏi (questions.json)</h3>
+          </div>
+          <button onclick="closeJsonModal()" class="text-slate-400 hover:text-white text-lg">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="p-5 overflow-y-auto bg-slate-950 text-emerald-400 text-xs font-mono-code leading-relaxed">
+          <pre id="json-pre-content"></pre>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+  document.getElementById("json-pre-content").textContent = JSON.stringify(QUIZ_DATABASE, null, 2);
+  modal.classList.remove("hidden");
+}
+
+function closeJsonModal() {
+  const modal = document.getElementById("json-viewer-modal");
+  if (modal) modal.classList.add("hidden");
+}

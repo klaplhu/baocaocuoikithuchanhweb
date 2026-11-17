@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+.font-mono-code {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.progress-transition {
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.option-card {
+  transition: all 0.15s ease-in-out;
+}
+
+.option-card:hover {
+  border-color: #6366f1;
+  background-color: #f8fafc;
+}
+
+.option-card.selected {
+  border-color: #4f46e5;
+  background-color: #eef2ff;
+  box-shadow: 0 0 0 1px #4f46e5;
+}
+
+@keyframes pulse-danger {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+.timer-warning {
+  animation: pulse-danger 1s infinite;
+}
