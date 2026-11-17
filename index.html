@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Adaptive Quiz System - Hệ thống Luyện tập & Kiểm tra Thích ứng</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#312e81',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    .progress-bar-fill {
+      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .option-card {
+      transition: all 0.2s ease;
+    }
+    .option-card:hover {
+      border-color: #6366f1;
+      background-color: #f5f7ff;
+    }
+    .option-card.selected {
+      border-color: #4f46e5;
+      background-color: #eef2ff;
+      box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.15);
+    }
+    @keyframes pulse-danger {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+    .timer-warning {
+      animation: pulse-danger 1s infinite;
+    }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- ==================== HEADER & NAVIGATION ==================== -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between py-3 gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3 cursor-pointer" onclick="switchView('list')">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+              <i class="fa-solid fa-brain text-lg"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200">Hệ thống luyện tập trực tuyến</span>
+                <span class="text-xs text-slate-500 hidden sm:inline">Học phần Thiết kế Web</span>
+              </div>
+              <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">
+                Adaptive Quiz System
+              </h1>
+            </div>
+          </div>
+
+          <button onclick="openJsonModal()" class="md:hidden inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">
+            <i class="fa-solid fa-code text-indigo-600"></i> JSON
+          </button>
+        </div>
+
+        <!-- Thanh chuyển đổi 3 trang -->
+        <nav class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80 overflow-x-auto">
+          <button id="nav-list" onclick="switchView('list')" class="nav-tab flex-1 md:flex-initial flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-white text-indigo-600 shadow-sm">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>1. Danh sách đề thi</span>
+          </button>
+          <button id="nav-quiz" onclick="switchView('quiz')" class="nav-tab flex-1 md:flex-initial flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-slate-900">
+            <i class="fa-solid fa-pen-to-square"></i>
+            <span>2. Trang Làm bài</span>
+            <span id="active-quiz-indicator" class="hidden w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+          </button>
+          <button id="nav-result" onclick="switchView('result')" class="nav-tab flex-1 md:flex-initial flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-slate-900">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>3. Trang Kết quả</span>
+          </button>
+        </nav>
+
+        <div class="hidden md:flex items-center gap-2">
+          <button onclick="openJsonModal()" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition shadow-sm">
+            <i class="fa-solid fa-file-code text-indigo-400"></i>
+            <span>Xem dữ liệu JSON</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT CONTAINER ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
+    <!-- TRANG 1: DANH SÁCH ĐỀ THI -->
+    <section id="view-list" class="space-y-6">
+      <div class="bg-gradient-to-r from-indigo-900 via-indigo-800 to-violet-900 rounded-2xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden">
+        <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          <div class="lg:col-span-8 space-y-3">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm text-indigo-200 text-xs font-medium border border-white/15">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+              <span>Tầm nhìn: Cá nhân hóa lộ trình học & Phân tích kỹ năng tự động</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              Hệ thống Luyện tập & Kiểm tra Thích ứng
+            </h2>
+            <p class="text-indigo-100 text-sm sm:text-base max-w-2xl leading-relaxed">
+              Chọn bộ đề theo chủ đề hoặc độ khó để kiểm tra năng lực. Hệ thống hỗ trợ câu hỏi tương tác đơn lựa chọn (<span class="font-semibold text-white">Radio</span>) và đa lựa chọn (<span class="font-semibold text-white">Checkbox</span>), chấm điểm tức thì và tự động sinh đề bù đắp các kỹ năng còn yếu.
+            </p>
+          </div>
+          <div class="lg:col-span-4 grid grid-cols-2 gap-3">
+            <div class="bg-white/10 backdrop-blur-md border border-white/15 rounded-xl p-4">
+              <p class="text-xs text-indigo-200">Tổng ngân hàng câu hỏi</p>
+              <p id="stat-total-questions" class="text-2xl font-bold mt-1">20 câu</p>
+              <p class="text-[11px] text-emerald-300 mt-1"><i class="fa-solid fa-check-circle"></i> Chuẩn JSON Schema</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur-md border border-white/15 rounded-xl p-4">
+              <p class="text-xs text-indigo-200">Số bài đã hoàn thành</p>
+              <p id="stat-completed-count" class="text-2xl font-bold mt-1">0 đề</p>
+              <p id="stat-weak-skill-badge" class="text-[11px] text-amber-300 mt-1 truncate">Chưa có dữ liệu</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Khung gợi ý Luyện tập thích ứng -->
+      <div id="adaptive-banner" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+        <div class="flex items-start gap-3.5">
+          <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 mt-0.5">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-bold text-amber-900">
+              Đề xuất Thích ứng: Phát hiện kỹ năng cần bù đắp!
+            </h3>
+            <p id="adaptive-banner-text" class="text-xs sm:text-sm text-amber-800 mt-0.5">
+              Dựa trên lần làm bài gần nhất, bạn cần củng cố thêm kiến thức.
+            </p>
+          </div>
+        </div>
+        <button onclick="startAdaptiveWeakSkillQuiz()" class="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs sm:text-sm font-semibold transition shadow-sm">
+          <i class="fa-solid fa-dumbbell"></i>
+          <span>Tạo đề ôn tập kỹ năng yếu ngay</span>
+        </button>
+      </div>
+
+      <!-- Bộ lọc đa năng -->
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-end">
+          <div class="lg:col-span-5">
+            <label for="search-input" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+              Tìm kiếm đề thi / Kỹ năng
+            </label>
+            <div class="relative">
+              <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-sm"></i>
+              <input
+                type="text"
+                id="search-input"
+                oninput="renderQuizList()"
+                placeholder="Nhập tên đề, chủ đề, hoặc kỹ năng (VD: Flexbox, DOM)..."
+                class="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition"
+              />
+            </div>
+          </div>
+
+          <div class="lg:col-span-3">
+            <label for="filter-topic" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+              Phân loại Chủ đề
+            </label>
+            <select
+              id="filter-topic"
+              onchange="renderQuizList()"
+              class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition"
+            >
+              <option value="ALL">Tất cả chủ đề</option>
+              <option value="HTML5 & CSS3">HTML5 & CSS3</option>
+              <option value="JavaScript">JavaScript & DOM</option>
+              <option value="Responsive & UI/UX">Responsive & UI/UX</option>
+              <option value="Tổng hợp">Tổng hợp Full Frontend</option>
+            </select>
+          </div>
+
+          <div class="lg:col-span-3">
+            <label for="filter-difficulty" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+              Mức độ khó
+            </label>
+            <select
+              id="filter-difficulty"
+              onchange="renderQuizList()"
+              class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition"
+            >
+              <option value="ALL">Tất cả độ khó</option>
+              <option value="Dễ">Dễ (Cơ bản)</option>
+              <option value="Trung bình">Trung bình (Vận dụng)</option>
+              <option value="Khó">Khó (Nâng cao)</option>
+            </select>
+          </div>
+
+          <div class="lg:col-span-1">
+            <button
+              onclick="resetFilters()"
+              title="Đặt lại bộ lọc"
+              class="w-full py-2.5 px-3 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900 text-sm font-medium transition flex items-center justify-center gap-1.5"
+            >
+              <i class="fa-solid fa-rotate-left"></i>
+              <span class="lg:hidden">Đặt lại</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Danh sách thẻ Đề thi -->
+      <div id="quiz-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5"></div>
+    </section>
+
+    <!-- TRANG 2: TRANG LÀM BÀI -->
+    <section id="view-quiz" class="hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div class="lg:col-span-8 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="p-4 sm:p-6 bg-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <span id="quiz-active-topic" class="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-indigo-500/30 text-indigo-200 border border-indigo-400/30">
+                  HTML5 & CSS3
+                </span>
+                <span id="quiz-active-difficulty" class="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                  Dễ
+                </span>
+                <span id="anticheat-badge" class="text-[11px] font-medium px-2.5 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700">
+                  <i class="fa-solid fa-shield-halved text-emerald-400 mr-1"></i>Giám sát tab: <strong id="tab-switch-count">0</strong> lần rời trang
+                </span>
+              </div>
+              <h2 id="quiz-active-title" class="text-lg sm:text-xl font-bold mt-2">
+                Đề thi
+              </h2>
+            </div>
+
+            <div id="timer-box" class="flex items-center gap-3 bg-slate-800/90 border border-slate-700 px-4 py-2.5 rounded-xl shrink-0 self-start sm:self-auto">
+              <div class="w-9 h-9 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                <i class="fa-regular fa-clock text-lg"></i>
+              </div>
+              <div>
+                <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Thời gian còn lại</p>
+                <p id="timer-display" class="text-xl font-extrabold font-mono tracking-wider text-white">05:00</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 px-4 sm:px-6 py-3.5 border-b border-slate-200">
+            <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-2">
+              <span id="progress-question-text">Câu hỏi 1 / 6</span>
+              <span id="progress-answered-text" class="text-indigo-600">Đã trả lời: 0/6 câu (0%)</span>
+            </div>
+            <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+              <div id="quiz-progress-bar" class="progress-bar-fill h-full bg-gradient-to-r from-indigo-600 to-violet-600 rounded-full" style="width: 16%"></div>
+            </div>
+          </div>
+
+          <div class="p-5 sm:p-7 space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex flex-wrap items-center gap-2">
+                <span id="question-type-badge" class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200">
+                  <i class="fa-regular fa-circle-dot"></i> Chọn 1 đáp án đúng (Radio)
+                </span>
+                <span id="question-skill-badge" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-lg bg-slate-100 text-slate-700">
+                  <i class="fa-solid fa-tag text-slate-400"></i> Kỹ năng
+                </span>
+              </div>
+
+              <button
+                id="btn-flag-question"
+                onclick="toggleFlagCurrentQuestion()"
+                class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-300 transition"
+              >
+                <i class="fa-regular fa-flag"></i>
+                <span>Đánh dấu xem lại</span>
+              </button>
+            </div>
+
+            <div class="space-y-2">
+              <h3 id="question-text" class="text-base sm:text-lg font-bold text-slate-900 leading-relaxed"></h3>
+              <p id="question-hint" class="text-xs text-slate-500"></p>
+            </div>
+
+            <div id="options-container" class="space-y-3" role="group" aria-label="Danh sách lựa chọn"></div>
+          </div>
+
+          <div class="px-5 sm:px-7 py-4 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+            <button
+              id="btn-prev"
+              onclick="navigateQuestion(-1)"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 text-sm font-semibold transition disabled:opacity-40 disabled:pointer-events-none"
+            >
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Câu trước</span>
+            </button>
+
+            <div class="flex items-center gap-2.5">
+              <button
+                id="btn-clear-answer"
+                onclick="clearCurrentAnswer()"
+                class="px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition"
+              >
+                Xóa lựa chọn
+              </button>
+
+              <button
+                id="btn-next"
+                onclick="navigateQuestion(1)"
+                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition shadow-sm"
+              >
+                <span>Câu tiếp theo</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bảng điều hướng câu hỏi -->
+        <div class="lg:col-span-4 space-y-5">
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Danh sách câu hỏi</h3>
+              <span id="palette-summary" class="text-xs font-medium text-slate-500">0/6 đã làm</span>
+            </div>
+
+            <div id="question-palette" class="grid grid-cols-5 sm:grid-cols-6 lg:grid-cols-4 gap-2.5"></div>
+
+            <div class="pt-3 border-t border-slate-100 grid grid-cols-2 gap-2 text-xs text-slate-600">
+              <div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-indigo-600 inline-block"></span><span>Đã trả lời</span></div>
+              <div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded border-2 border-indigo-600 bg-indigo-50 inline-block"></span><span>Đang xem</span></div>
+              <div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-amber-100 border border-amber-400 inline-block"></span><span>Đánh dấu xem lại</span></div>
+              <div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-slate-100 border border-slate-300 inline-block"></span><span>Chưa trả lời</span></div>
+            </div>
+
+            <div class="pt-2">
+              <button
+                onclick="requestSubmitQuiz()"
+                class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-sm shadow-md shadow-emerald-100 flex items-center justify-center gap-2 transition"
+              >
+                <i class="fa-solid fa-paper-plane"></i>
+                <span>Nộp bài & Chấm điểm ngay</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-indigo-50/70 rounded-2xl border border-indigo-100 p-4 text-xs text-indigo-900 space-y-2">
+            <div class="font-bold flex items-center gap-1.5 text-indigo-800">
+              <i class="fa-solid fa-circle-info"></i>
+              <span>Cơ chế Chấm điểm & Phân tích</span>
+            </div>
+            <p class="leading-relaxed text-indigo-700">
+              Đối với câu hỏi <strong>Checkbox (nhiều đáp án)</strong>, bạn cần chọn đúng và đủ tất cả các phương án đúng để được tính điểm tối đa. Hệ thống sẽ đối chiếu nhãn <code>skill</code> của từng câu để chỉ ra lỗ hổng kiến thức sau khi nộp.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRANG 3: TRANG KẾT QUẢ & PHÂN TÍCH KỸ NĂNG -->
+    <section id="view-result" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 sm:p-8 text-white">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div class="space-y-2">
+              <span id="result-badge-status" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                <i class="fa-solid fa-award"></i> ĐẠT YÊU CẦU
+              </span>
+              <h2 id="result-quiz-title" class="text-2xl sm:text-3xl font-extrabold">Kết quả bài làm</h2>
+              <p id="result-timestamp" class="text-xs sm:text-sm text-slate-300">Hoàn thành lúc: --</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+              <button
+                onclick="retryCurrentQuiz()"
+                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-semibold border border-white/15 transition"
+              >
+                <i class="fa-solid fa-rotate-right"></i>
+                <span>Làm lại đề này</span>
+              </button>
+              <button
+                id="btn-adaptive-practice-result"
+                onclick="startAdaptiveWeakSkillQuiz()"
+                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs sm:text-sm font-bold transition shadow-md"
+              >
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span>Luyện tập bù đắp kỹ năng yếu</span>
+              </button>
+              <button
+                onclick="switchView('list')"
+                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-semibold transition"
+              >
+                <i class="fa-solid fa-list"></i>
+                <span>Chọn đề khác</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-white/10">
+            <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+              <p class="text-xs text-slate-300">Điểm số hệ 10</p>
+              <p id="result-score-10" class="text-2xl sm:text-3xl font-extrabold text-amber-400 mt-1">0.0 / 10</p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+              <p class="text-xs text-slate-300">Số câu trả lời đúng</p>
+              <p id="result-correct-ratio" class="text-2xl sm:text-3xl font-extrabold text-emerald-400 mt-1">0 / 0</p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+              <p class="text-xs text-slate-300">Tỷ lệ chính xác</p>
+              <p id="result-accuracy" class="text-2xl sm:text-3xl font-extrabold text-indigo-300 mt-1">0%</p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+              <p class="text-xs text-slate-300">Thời gian hoàn thành</p>
+              <p id="result-time-spent" class="text-2xl sm:text-3xl font-extrabold text-white mt-1">00:00</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-5">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div>
+              <h3 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-chart-column text-indigo-600"></i>
+                <span>Phân tích Kỹ năng & Kiến thức</span>
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">
+                Đánh giá mức độ nắm vững từng mảng kỹ năng để gợi ý ôn tập
+              </p>
+            </div>
+          </div>
+          <div id="skills-breakdown-container" class="space-y-4"></div>
+          <div id="weak-skills-recommendation" class="rounded-xl p-4 bg-rose-50 border border-rose-200 space-y-2"></div>
+        </div>
+
+        <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h3 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-magnifying-glass-chart text-rose-600"></i>
+                <span>Chi tiết Câu sai & Giải thích từ JSON</span>
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">
+                Đối chiếu đáp án đã chọn, đáp án đúng và giải thích chuyên sâu
+              </p>
+            </div>
+
+            <div class="inline-flex bg-slate-100 p-1 rounded-xl border border-slate-200 self-start">
+              <button
+                id="btn-filter-wrong"
+                onclick="setReviewFilter('wrong')"
+                class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-rose-600 shadow-sm transition"
+              >
+                Chỉ câu sai (<span id="count-wrong-tab">0</span>)
+              </button>
+              <button
+                id="btn-filter-all"
+                onclick="setReviewFilter('all')"
+                class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition"
+              >
+                Tất cả câu (<span id="count-all-tab">0</span>)
+              </button>
+            </div>
+          </div>
+
+          <div id="review-questions-container" class="space-y-4"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-white border-t border-slate-200 mt-12 py-5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+      <div>
+        <strong>Adaptive Quiz System</strong> • Hệ thống Luyện tập & Kiểm tra thích ứng trực tuyến
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="inline-flex items-center gap-1"><i class="fa-brands fa-html5 text-orange-500"></i> HTML5</span>
+        <span class="inline-flex items-center gap-1"><i class="fa-brands fa-css3-alt text-blue-500"></i> CSS3 Flexbox/Grid</span>
+        <span class="inline-flex items-center gap-1"><i class="fa-brands fa-js text-amber-500"></i> Vanilla JS & JSON</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== MODAL XÁC NHẬN NỘP BÀI ==================== -->
+  <div id="submit-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl shrink-0">
+          <i class="fa-solid fa-circle-question"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-slate-900">Xác nhận nộp bài kiểm tra</h3>
+          <p id="submit-modal-subtitle" class="text-xs text-slate-500">Kiểm tra lại tiến độ trước khi chấm điểm</p>
+        </div>
+      </div>
+
+      <div id="submit-modal-body" class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-700 space-y-1.5"></div>
+
+      <div class="flex items-center justify-end gap-2.5 pt-2">
+        <button
+          onclick="closeSubmitModal()"
+          class="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 text-xs sm:text-sm font-semibold transition"
+        >
+          Quay lại làm tiếp
+        </button>
+        <button
+          onclick="confirmSubmitQuiz()"
+          class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold transition shadow-sm"
+        >
+          Chắc chắn nộp bài
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL XEM DỮ LIỆU JSON ==================== -->
+  <div id="json-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[85vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <i class="fa-solid fa-database text-indigo-400"></i>
+          <h3 class="text-sm sm:text-base font-bold">Ngân hàng câu hỏi JSON (questions.json)</h3>
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            onclick="copyJsonData()"
+            class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition flex items-center gap-1.5"
+          >
+            <i class="fa-regular fa-copy"></i>
+            <span id="copy-json-btn-text">Sao chép JSON</span>
+          </button>
+          <button onclick="closeJsonModal()" class="text-slate-400 hover:text-white p-1">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+      </div>
+      <div class="p-4 sm:p-6 overflow-y-auto bg-slate-950 text-emerald-300 font-mono text-xs leading-relaxed">
+        <pre id="json-viewer-content"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TOAST NOTIFICATION ==================== -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden items-center gap-3 px-4 py-3 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-medium shadow-xl border border-slate-700">
+    <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400"></i>
+    <span id="toast-message">Thông báo</span>
+  </div>
+
+  <!-- KẾT NỐI 3 MODULE JAVASCRIPT CỦA THÀNH VIÊN 1, 3, 4 -->
+  <script src="data.js"></script>
+  <script src="quiz.js"></script>
+  <script src="result.js"></script>
+
+  <!-- LOGIC TRANG 1: DANH SÁCH ĐỀ THI & BỘ LỌC (THÀNH VIÊN 2) -->
+  <script>
+    function renderQuizList() {
+      const searchKeyword = document.getElementById("search-input").value.trim().toLowerCase();
+      const topicFilter = document.getElementById("filter-topic").value;
+      const difficultyFilter = document.getElementById("filter-difficulty").value;
+      const container = document.getElementById("quiz-cards-container");
+
+      const filteredQuizzes = QUIZZES_DATA.filter(quiz => {
+        const matchTopic = topicFilter === "ALL" || quiz.topic === topicFilter;
+        const matchDifficulty = difficultyFilter === "ALL" || quiz.difficulty === difficultyFilter;
+        const skillsInQuiz = [...new Set(quiz.questions.map(q => q.skill))];
+        const matchKeyword =
+          !searchKeyword ||
+          quiz.title.toLowerCase().includes(searchKeyword) ||
+          quiz.description.toLowerCase().includes(searchKeyword) ||
+          quiz.topic.toLowerCase().includes(searchKeyword) ||
+          skillsInQuiz.some(s => s.toLowerCase().includes(searchKeyword));
+
+        return matchTopic && matchDifficulty && matchKeyword;
+      });
+
+      if (filteredQuizzes.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full bg-white rounded-2xl border border-slate-200 p-10 text-center space-y-3">
+            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">
+              <i class="fa-solid fa-folder-open"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-800">Không tìm thấy đề thi phù hợp</h3>
+            <p class="text-xs sm:text-sm text-slate-500">Hãy thử thay đổi từ khóa hoặc đặt lại bộ lọc Chủ đề / Độ khó.</p>
+            <button onclick="resetFilters()" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition">
+              Hiển thị tất cả đề thi
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filteredQuizzes.map(quiz => {
+        const skills = [...new Set(quiz.questions.map(q => q.skill))];
+        const singleCount = quiz.questions.filter(q => q.type === "single").length;
+        const multipleCount = quiz.questions.filter(q => q.type === "multiple").length;
+        const history = quizHistory[quiz.id];
+
+        let diffBadgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+        if (quiz.difficulty === "Trung bình") {
+          diffBadgeClass = "bg-amber-50 text-amber-700 border-amber-200";
+        } else if (quiz.difficulty === "Khó") {
+          diffBadgeClass = "bg-rose-50 text-rose-700 border-rose-200";
+        }
+
+        return `
+          <article class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm hover:shadow-md hover:border-indigo-300 transition flex flex-col justify-between gap-5">
+            <div class="space-y-3.5">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200">
+                    ${escapeHTML(quiz.topic)}
+                  </span>
+                  <span class="text-xs font-bold px-2.5 py-1 rounded-lg border ${diffBadgeClass}">
+                    Độ khó: ${escapeHTML(quiz.difficulty)}
+                  </span>
+                </div>
+                ${
+                  history
+                    ? `<span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <i class="fa-solid fa-check-double mr-1"></i>Điểm cao nhất: ${history.bestScore10}/10
+                       </span>`
+                    : `<span class="text-xs font-medium text-slate-400">Chưa làm</span>`
+                }
+              </div>
+
+              <div>
+                <h3 class="text-lg font-bold text-slate-900">
+                  ${escapeHTML(quiz.title)}
+                </h3>
+                <p class="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
+                  ${escapeHTML(quiz.description)}
+                </p>
+              </div>
+
+              <div class="space-y-1.5">
+                <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Kỹ năng đánh giá:</p>
+                <div class="flex flex-wrap gap-1.5">
+                  ${skills
+                    .map(
+                      skill => `
+                    <span class="text-xs font-medium px-2.5 py-0.5 rounded-md ${
+                      globalWeakSkills.has(skill)
+                        ? "bg-amber-100 text-amber-800 border border-amber-300 font-semibold"
+                        : "bg-slate-100 text-slate-700"
+                    }">
+                      ${globalWeakSkills.has(skill) ? '<i class="fa-solid fa-triangle-exclamation text-amber-600 mr-1"></i>' : ""}${escapeHTML(skill)}
+                    </span>
+                  `
+                    )
+                    .join("")}
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex flex-wrap items-center gap-3 text-xs text-slate-600 font-medium">
+                <span class="inline-flex items-center gap-1.5">
+                  <i class="fa-regular fa-circle-question text-indigo-500"></i>
+                  <strong>${quiz.questions.length} câu</strong> (${singleCount} Radio, ${multipleCount} Checkbox)
+                </span>
+                <span class="inline-flex items-center gap-1.5">
+                  <i class="fa-regular fa-clock text-indigo-500"></i>
+                  <strong>${quiz.durationMinutes} phút</strong>
+                </span>
+              </div>
+
+              <button
+                onclick="startQuizById('${quiz.id}', true)"
+                class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold transition shadow-sm shrink-0"
+              >
+                <span>Bắt đầu làm bài</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function resetFilters() {
+      document.getElementById("search-input").value = "";
+      document.getElementById("filter-topic").value = "ALL";
+      document.getElementById("filter-difficulty").value = "ALL";
+      renderQuizList();
+    }
+
+    function updateDashboardStats() {
+      const totalQuestions = QUIZZES_DATA.reduce((sum, q) => sum + q.questions.length, 0);
+      document.getElementById("stat-total-questions").textContent = `${totalQuestions} câu`;
+
+      const completedCount = Object.keys(quizHistory).length;
+      document.getElementById("stat-completed-count").textContent = `${completedCount} đề`;
+
+      const weakBanner = document.getElementById("adaptive-banner");
+      const weakBadge = document.getElementById("stat-weak-skill-badge");
+
+      if (globalWeakSkills.size > 0) {
+        const skillsArr = Array.from(globalWeakSkills);
+        weakBadge.innerHTML = `<i class="fa-solid fa-bolt"></i> Cần ôn: ${escapeHTML(skillsArr[0])}`;
+        weakBanner.classList.remove("hidden");
+        document.getElementById("adaptive-banner-text").innerHTML =
+          `Hệ thống ghi nhận bạn còn sai ở kỹ năng: <strong>${skillsArr.map(escapeHTML).join(", ")}</strong>. Hãy làm đề tổng hợp thích ứng để lấp đầy lỗ hổng kiến thức!`;
+      } else {
+        weakBadge.textContent = completedCount > 0 ? "Phong độ rất tốt!" : "Chưa có dữ liệu";
+        weakBanner.classList.add("hidden");
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      updateDashboardStats();
+      renderQuizList();
+    });
+  </script>
+</body>
+</html>
