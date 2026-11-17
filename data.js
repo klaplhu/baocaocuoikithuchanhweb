@@ -340,7 +340,7 @@ const SKILL_RECOMMENDATIONS = {
   "CSS Units & Typography": "Phân biệt rõ đơn vị tương đối 'rem' (theo thẻ gốc html), 'em' (theo phần tử cha) và 'vw/vh' (theo khung nhìn).",
   "Web Accessibility (UI/UX)": "Chú ý liên kết thẻ <label> với <input>, đảm bảo độ tương phản màu sắc và kích thước vùng chạm trên di động.",
   "Async & Fetch API": "Xem lại luồng xử lý bất đồng bộ với Promise, cú pháp async/await và hai bước giải mã dữ liệu từ fetch().",
-  "Web Security & Performance": "Hiểu rõ cách phòng chống lỗi hiển thị thẻ HTML và lỗ hổng XSS bằng cách escape ký tự đặc biệt (<, >, &, ")."
+  "Web Security & Performance": "Hiểu rõ cách phòng chống lỗi hiển thị thẻ HTML và lỗ hổng XSS bằng cách escape ký tự đặc biệt (<, >, &)."
 };
 
 // ==================== BIẾN TRẠNG THÁI TOÀN CỤC ====================
