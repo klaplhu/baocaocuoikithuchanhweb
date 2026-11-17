@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trang Kết quả - Adaptive Quiz System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Header dùng chung -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+          <i class="fa-solid fa-brain text-lg"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">HỆ THỐNG LUYỆN TẬP TRỰC TUYẾN</span>
+            <span class="text-xs text-slate-400 hidden sm:inline">Học phần Thiết kế Web</span>
+          </div>
+          <h1 class="text-base sm:text-lg font-extrabold text-slate-900 leading-tight">Adaptive Quiz System</h1>
+        </div>
+      </div>
+
+      <nav class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200/80">
+        <a href="index.html" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 flex items-center gap-1.5">
+          <i class="fa-solid fa-layer-group"></i>
+          <span>1. Danh sách đề thi</span>
+        </a>
+        <a href="quiz.html" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 flex items-center gap-1.5">
+          <i class="fa-solid fa-pen-to-square"></i>
+          <span>2. Trang Làm bài</span>
+        </a>
+        <a href="result.html" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-white text-indigo-600 shadow-sm flex items-center gap-1.5">
+          <i class="fa-solid fa-chart-pie"></i>
+          <span>3. Trang Kết quả</span>
+        </a>
+      </nav>
+
+      <button onclick="openJsonModal()" class="hidden md:flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition">
+        <i class="fa-solid fa-file-code text-indigo-400"></i>
+        <span>Xem dữ liệu JSON</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <!-- Banner Tổng hợp Kết quả -->
+    <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl mb-8">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-6">
+        <div>
+          <span id="res-status-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-400/30 mb-3">
+            ĐÁNH GIÁ KẾT QUẢ
+          </span>
+          <h2 id="res-title" class="text-2xl sm:text-3xl font-extrabold">Kết quả bài làm</h2>
+          <p id="res-meta" class="text-xs sm:text-sm text-slate-300 mt-1"></p>
+        </div>
+
+        <div class="flex flex-wrap gap-2.5">
+          <a href="quiz.html" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 transition">
+            <i class="fa-solid fa-rotate-right"></i> Làm lại đề này
+          </a>
+          <button id="btn-adaptive-practice" onclick="generateAdaptiveQuiz()"
+            class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm flex items-center gap-2 transition">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Luyện tập bù đắp kỹ năng yếu
+          </button>
+          <a href="index.html" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 transition">
+            <i class="fa-solid fa-list"></i> Chọn đề khác
+          </a>
+        </div>
+      </div>
+
+      <!-- 4 Ô chỉ số thống kê -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+          <p class="text-xs text-slate-300 mb-1">Điểm số hệ 10</p>
+          <p id="stat-score-10" class="text-2xl sm:text-3xl font-extrabold text-amber-400">0.0 / 10</p>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+          <p class="text-xs text-slate-300 mb-1">Số câu trả lời đúng</p>
+          <p id="stat-correct-count" class="text-2xl sm:text-3xl font-extrabold text-emerald-400">0 / 0</p>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+          <p class="text-xs text-slate-300 mb-1">Tỷ lệ chính xác</p>
+          <p id="stat-accuracy" class="text-2xl sm:text-3xl font-extrabold text-indigo-300">0%</p>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+          <p class="text-xs text-slate-300 mb-1">Thời gian hoàn thành</p>
+          <p id="stat-time-spent" class="text-2xl sm:text-3xl font-extrabold text-white font-mono-code">00:00</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 Cột: Phân tích kỹ năng & Chi tiết câu sai kèm giải thích JSON -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div class="lg:col-span-5 bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+        <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2 mb-1">
+          <i class="fa-solid fa-chart-column text-indigo-600"></i> Phân tích Kỹ năng & Kiến thức
+        </h3>
+        <p class="text-xs text-slate-500 mb-5">Đánh giá mức độ nắm vững từng mảng kỹ năng để gợi ý ôn tập</p>
+        <div id="skills-analysis-list" class="space-y-4"></div>
+      </div>
+
+      <div class="lg:col-span-7 bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-5">
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-circle-exclamation text-rose-500"></i> Chi tiết Câu sai & Giải thích từ JSON
+            </h3>
+            <p class="text-xs text-slate-500">Đối chiếu đáp án đã chọn, đáp án đúng và giải thích chuyên sâu</p>
+          </div>
+          <div class="flex gap-1 bg-slate-100 p-1 rounded-lg text-xs font-semibold">
+            <button id="filter-wrong-btn" onclick="renderReviewList('wrong')" class="px-3 py-1 rounded-md bg-white text-rose-600 shadow-sm">Chỉ câu sai</button>
+            <button id="filter-all-btn" onclick="renderReviewList('all')" class="px-3 py-1 rounded-md text-slate-600">Tất cả câu</button>
+          </div>
+        </div>
+
+        <div id="review-questions-container" class="space-y-4"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/result.js"></script>
+</body>
+</html>
